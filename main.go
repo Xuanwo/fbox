@@ -111,8 +111,6 @@ func main() {
 		RemoteAddressHeaders: []string{"X-Forwarded-For"},
 	}).Handler(http.DefaultServeMux)
 
-	nodes = append(nodes, bAddr)
-
 	log.Infof("fbox %s listening on %s", FullVersion(), bAddr)
 	if err := http.ListenAndServe(bind, app); err != nil {
 		log.WithField("err", err).Fatal("Could not listen and serve")
