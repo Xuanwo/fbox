@@ -7,6 +7,7 @@ import (
 	"net/http"
 
 	log "github.com/sirupsen/logrus"
+	"github.com/tomasen/realip"
 	"github.com/unrolled/render"
 )
 
@@ -27,10 +28,7 @@ func joinHandler(w http.ResponseWriter, req *http.Request) {
 
 	remoteAddr, ok := data["addr"]
 	if !ok {
-		msg := fmt.Sprintf("bad payload found (missing addr): %v", data)
-		log.Error(msg)
-		w.WriteHeader(http.StatusBadRequest)
-		return
+		remoteAddr = realip.FromRequest(req)
 	}
 
 	addr, err := net.ResolveTCPAddr("tcp4", remoteAddr)
@@ -50,11 +48,17 @@ func joinHandler(w http.ResponseWriter, req *http.Request) {
 			return
 		}
 		addr.IP = reqAddr.IP
-		remoteAddr = addr.String()
 	}
 
-	log.Debugf("[join]: remoteAddr: %s", remoteAddr)
-	nodes = append(nodes, fmt.Sprintf("%s:8000", remoteAddr))
+	if addr.Port == 0 {
+		// TODO: Make this a constant
+		addr.Port = 8000
+	}
+
+	remoteAddr = addr.String()
+
+	log.Infof("node joined from %s", remoteAddr)
+	nodes = append(nodes, remoteAddr)
 }
 
 func nodesHandler(w http.ResponseWriter, req *http.Request) {
