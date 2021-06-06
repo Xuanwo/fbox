@@ -1,10 +1,7 @@
 package main
 
 import (
-	"encoding/hex"
-	"errors"
 	"fmt"
-	"io/ioutil"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -13,6 +10,7 @@ import (
 	flag "github.com/spf13/pflag"
 	"github.com/unrolled/logger"
 
+	"github.com/prologic/fbox/blob"
 	"github.com/prologic/fbox/store"
 )
 
@@ -67,55 +65,7 @@ func main() {
 	storage := store.NewDiskStore(dir)
 	log.Infof("using %s for storage", storage)
 
-	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		var logger *log.Entry
-		status, body := func() (int, []byte) {
-			hkey := r.URL.Path[1:]
-			key, err := hex.DecodeString(hkey)
-			if err != nil {
-				return http.StatusBadRequest, []byte(fmt.Sprintf("%q: not a valid path, expecting hex key only", r.URL.Path))
-			}
-			logger = log.WithFields(log.Fields{
-				"op":  r.Method,
-				"key": hkey,
-			})
-			switch r.Method {
-			case http.MethodGet:
-				value, err := storage.Get(key)
-				if errors.Is(err, store.ErrNotFound) {
-					logger.WithField("err", err).Debug("Not found")
-					return http.StatusNotFound, nil
-				}
-				if err != nil {
-					logger.WithField("err", err).Error()
-					return http.StatusInternalServerError, []byte(fmt.Sprintf("%q: %v", hkey, err))
-				}
-				logger.Debug("Success")
-				return http.StatusOK, value
-			case http.MethodPut:
-				value, err := ioutil.ReadAll(r.Body)
-				if err != nil {
-					logger.WithField("err", err).Error()
-					return http.StatusInternalServerError, []byte(fmt.Sprintf("%q: %v", hkey, err))
-				}
-				if err := storage.Put(key, value); err != nil {
-					logger.WithField("err", err).Error()
-					return http.StatusInternalServerError, []byte(fmt.Sprintf("%q: %v", hkey, err))
-				}
-				logger.Debug("Success")
-				return http.StatusOK, nil
-			default:
-				logger.Warn("Bad request")
-				return http.StatusBadRequest, []byte(fmt.Sprintf("%q: invalid method, expecting GET or PUT", r.Method))
-			}
-		}()
-		w.WriteHeader(status)
-		if body != nil {
-			if _, err := w.Write(body); err != nil {
-				logger.WithField("err", err).Error("Failed writing response")
-			}
-		}
-	})
+	http.Handle("/", blob.NewHandler(store.NewDiskStore(dir)))
 
 	app := logger.New(logger.Options{
 		Prefix:               "fbox",
