@@ -1,11 +1,14 @@
 package main
 
 import (
+	"bytes"
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"os"
 	"path/filepath"
 
+	"github.com/hashicorp/go-sockaddr/template"
 	log "github.com/sirupsen/logrus"
 	flag "github.com/spf13/pflag"
 	"github.com/unrolled/logger"
@@ -18,8 +21,10 @@ var (
 	debug   bool
 	version bool
 
-	bind string
-	dir  string
+	bind             string
+	master           string
+	advertiseAddress string
+	dir              string
 )
 
 const helpText = `
@@ -40,7 +45,17 @@ func init() {
 	flag.BoolVarP(&debug, "debug", "D", false, "enable debug logging")
 
 	flag.StringVarP(&bind, "bind", "b", "0.0.0.0:8000", "[interface]:port to bind to")
+	flag.StringVarP(&master, "master", "m", "", "address:port of master")
+	flag.StringVarP(&advertiseAddress, "advertise-addr", "a", "", "[interface]:port to advertise")
 	flag.StringVarP(&dir, "dir", "d", "./data", "path to store data in")
+}
+
+func mustParseAddress(addr string) string {
+	r, err := template.Parse(addr)
+	if err != nil {
+		log.WithError(err).Fatalf("error parsing addr %s", addr)
+	}
+	return r
 }
 
 func main() {
@@ -57,6 +72,10 @@ func main() {
 		os.Exit(0)
 	}
 
+	bAddr := mustParseAddress(bind)
+	mAddr := mustParseAddress(master)
+	aAddr := mustParseAddress(advertiseAddress)
+
 	dir := os.ExpandEnv(dir)
 	if err := os.MkdirAll(dir, 0700); err != nil {
 		log.WithError(err).Fatalf("error creating directory %s", dir)
@@ -65,14 +84,36 @@ func main() {
 	storage := store.NewDiskStore(dir)
 	log.Infof("using %s for storage", storage)
 
-	http.Handle("/", blob.NewHandler(store.NewDiskStore(dir)))
+	http.Handle("/blobs", blob.NewHandler(store.NewDiskStore(dir)))
+
+	if mAddr == "" {
+		http.HandleFunc("/join", joinHandler)
+		http.HandleFunc("/nodes", nodesHandler)
+		http.HandleFunc("/upload", uploadHandler)
+		http.HandleFunc("/download", downloadHandler)
+	} else {
+		data, _ := json.Marshal(map[string]string{"addr": aAddr})
+		buf := bytes.NewReader(data)
+		res, err := http.Post(mAddr+"/join", "application/json", buf)
+		if err != nil {
+			log.WithError(err).Fatalf("error joining master node %s", master)
+		}
+		defer res.Body.Close()
+
+		if res.StatusCode != 200 {
+			log.Fatalf("error joining master node (non-200 response): %s", res.Status)
+		}
+		log.Infof("successfully joined master node %s", master)
+	}
 
 	app := logger.New(logger.Options{
 		Prefix:               "fbox",
 		RemoteAddressHeaders: []string{"X-Forwarded-For"},
 	}).Handler(http.DefaultServeMux)
 
-	log.Infof("fbox %s listening on %s", FullVersion(), bind)
+	nodes = append(nodes, bAddr)
+
+	log.Infof("fbox %s listening on %s", FullVersion(), bAddr)
 	if err := http.ListenAndServe(bind, app); err != nil {
 		log.WithField("err", err).Fatal("Could not listen and serve")
 	}
