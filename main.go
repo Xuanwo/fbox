@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"time"
 
 	"github.com/hashicorp/go-sockaddr/template"
 	log "github.com/sirupsen/logrus"
@@ -58,6 +59,24 @@ func mustParseAddress(addr string) string {
 	return r
 }
 
+func joinNode(aAddr, mAddr string) error {
+	data, _ := json.Marshal(map[string]string{"addr": aAddr})
+	buf := bytes.NewReader(data)
+	res, err := http.Post(mAddr+"/join", "application/json", buf)
+	if err != nil {
+		log.WithError(err).Error("error making join request")
+		return fmt.Errorf("error making join request: %w", err)
+	}
+	defer res.Body.Close()
+
+	if res.StatusCode != 200 {
+		log.WithError(err).Error("non-200 recieved from join request")
+		return fmt.Errorf("non-200 recieved from join request: %s", res.Status)
+	}
+
+	return nil
+}
+
 func main() {
 	flag.Parse()
 
@@ -91,17 +110,19 @@ func main() {
 		http.HandleFunc("/nodes", nodesHandler)
 		http.HandleFunc("/upload", uploadHandler)
 		http.HandleFunc("/download", downloadHandler)
-	} else {
-		data, _ := json.Marshal(map[string]string{"addr": aAddr})
-		buf := bytes.NewReader(data)
-		res, err := http.Post(mAddr+"/join", "application/json", buf)
-		if err != nil {
-			log.WithError(err).Fatalf("error joining master node %s", master)
-		}
-		defer res.Body.Close()
 
-		if res.StatusCode != 200 {
-			log.Fatalf("error joining master node (non-200 response): %s", res.Status)
+		// Join ourself
+		go func() {
+			time.Sleep(time.Second * 3)
+			if err := joinNode(aAddr, fmt.Sprintf("http://%s", aAddr)); err != nil {
+				log.WithError(err).Fatalf("error joining node %s", mAddr)
+			}
+			log.Infof("successfully joined master node %s", master)
+		}()
+	} else {
+		// Join an existing node
+		if err := joinNode(aAddr, mAddr); err != nil {
+			log.WithError(err).Fatalf("error joining node %s", mAddr)
 		}
 		log.Infof("successfully joined master node %s", master)
 	}
