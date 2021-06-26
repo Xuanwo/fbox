@@ -68,6 +68,10 @@ func nodesHandler(w http.ResponseWriter, req *http.Request) {
 	r.JSON(w, http.StatusOK, nodes)
 }
 
+func filesHandler(w http.ResponseWriter, req *http.Request) {
+	r.JSON(w, http.StatusOK, files)
+}
+
 func uploadHandler(w http.ResponseWriter, r *http.Request) {
 	dump, err := httputil.DumpRequest(r, true)
 	if err != nil {
