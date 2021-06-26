@@ -6,7 +6,6 @@ import (
 	"io"
 	"net"
 	"net/http"
-	"net/http/httputil"
 	"os"
 
 	log "github.com/sirupsen/logrus"
@@ -73,14 +72,6 @@ func filesHandler(w http.ResponseWriter, req *http.Request) {
 }
 
 func uploadHandler(w http.ResponseWriter, r *http.Request) {
-	dump, err := httputil.DumpRequest(r, true)
-	if err != nil {
-		http.Error(w, fmt.Sprint(err), http.StatusInternalServerError)
-		return
-	}
-
-	log.Debugf("req: %q", dump)
-
 	name := r.URL.Path
 
 	tf, err := receiveFile(r.Body)
@@ -133,8 +124,34 @@ func uploadHandler(w http.ResponseWriter, r *http.Request) {
 		Name:   name,
 		Size:   stat.Size(),
 		Hash:   hash,
+		Parity: parityShards,
 		Shards: uris,
 	}
 }
 
-func downloadHandler(w http.ResponseWriter, r *http.Request) {}
+func downloadHandler(w http.ResponseWriter, r *http.Request) {
+	name := r.URL.Path
+
+	metadata, ok := files[name]
+	if !ok {
+		msg := fmt.Sprintf("error file not found: %s", name)
+		log.Error(msg)
+		w.WriteHeader(http.StatusNotFound)
+		return
+	}
+
+	f, err := readFile(metadata)
+	if err != nil {
+		msg := fmt.Sprintf("error reading file: %s", err)
+		log.WithError(err).Error(msg)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	if _, err := io.Copy(w, f); err != nil {
+		msg := fmt.Sprintf("error sending file: %s", err)
+		log.WithError(err).Error(msg)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+}

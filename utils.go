@@ -119,6 +119,150 @@ func createShards(r io.ReadSeeker, size int64) ([]io.ReadSeeker, error) {
 	return rs, nil
 }
 
+func getShard(uri string) (io.Reader, error) {
+	tf, err := ioutil.TempFile("", "fbox-receive-*")
+	if err != nil {
+		log.WithError(err).Error("error creating temporary shard file")
+		return nil, err
+	}
+
+	res, err := request(http.MethodGet, uri, nil, nil)
+	if err != nil {
+		log.WithError(err).Error("error making shard request")
+		return nil, fmt.Errorf("error making shard request: %w", err)
+	}
+
+	if res.StatusCode != 200 {
+		log.WithField("Status", res.Status).Error("non-200 shard response")
+		return nil, fmt.Errorf("non-200 shard response")
+	}
+	defer res.Body.Close()
+
+	if _, err := io.Copy(tf, res.Body); err != nil {
+		log.WithError(err).Error("error reading shard")
+		return nil, fmt.Errorf("error reading sahrd: %w", err)
+	}
+
+	if err := tf.Close(); err != nil {
+		log.WithError(err).Error("error closing tempoary shard file")
+		return nil, fmt.Errorf("error closing temporary shard file: %w", err)
+	}
+
+	return os.Open(tf.Name())
+}
+
+func getShards(uris []string) ([]io.Reader, error) {
+	shards := make([]io.Reader, len(uris))
+
+	for i, uri := range uris {
+		shard, err := getShard(uri)
+		if err != nil {
+			log.WithError(err).WithField("uri", uri).Error("error getting shard")
+			shards[i] = nil
+			continue
+		}
+		shards[i] = shard
+	}
+
+	return shards, nil
+}
+
+func repairShards(enc reedsolomon.StreamEncoder, shards []io.Reader) ([]io.Reader, error) {
+	// Create out destination writers
+	out := make([]io.Writer, len(shards))
+	for i := range out {
+		if shards[i] == nil {
+			tf, err := ioutil.TempFile("", "fbox-repair-*")
+			if err != nil {
+				log.WithError(err).Error("error creating temporary shard file")
+				return nil, err
+			}
+
+			out[i] = tf
+		}
+	}
+
+	if err := enc.Reconstruct(shards, out); err != nil {
+		log.WithError(err).Error("error reconstructing shards")
+		return nil, fmt.Errorf("error reconstructing shards: %w", err)
+	}
+
+	// Close output.
+	for i := range out {
+		if out[i] != nil {
+			if err := out[i].(*os.File).Close(); err != nil {
+				log.WithError(err).Error("error closing shard file")
+				return nil, fmt.Errorf("error closing shard file: %w", err)
+			}
+			f, err := os.Open(out[i].(*os.File).Name())
+			if err != nil {
+				log.WithError(err).Error("error reopening repaired sshard file")
+				return nil, fmt.Errorf("error reopening reparied shard file: %w", err)
+			}
+			shards[i] = f
+		}
+	}
+
+	ok, err := enc.Verify(shards)
+	if err != nil {
+		log.WithError(err).Error("error verifying repaired shards")
+		return nil, fmt.Errorf("error verifying repaired shards: %w", err)
+	}
+
+	if !ok {
+		log.Error("error verifying repaired shards")
+		return nil, fmt.Errorf("error verifying repaired shards")
+	}
+
+	return shards, nil
+}
+
+func readFile(metadata Metadata) (io.Reader, error) {
+	// Create matrix
+	enc, err := reedsolomon.NewStream(dataShards, parityShards)
+	if err != nil {
+		log.WithError(err).Error("error creating reedsolomon stream")
+		return nil, fmt.Errorf("error creating reedsolomon stream: %w", err)
+	}
+
+	// Open the inputs
+	shards, err := getShards(metadata.Shards)
+	if err != nil {
+		log.WithError(err).Error("error getting shards")
+		return nil, fmt.Errorf("error getting shards: %s", err)
+	}
+
+	// Verify the shards
+	ok, err := enc.Verify(shards)
+	if err != nil {
+		log.WithError(err).Error("error verifying shards")
+		return nil, fmt.Errorf("error verifying shards: %w", err)
+	}
+	if !ok {
+		log.Warn("shard verification failed, reconstructing shards...")
+	}
+
+	shards, err = repairShards(enc, shards)
+	if err != nil {
+		log.WithError(err).Error("error repairing shards")
+		return nil, fmt.Errorf("error repairing shards: %s", err)
+	}
+
+	tf, err := ioutil.TempFile("", "fbox-*")
+	if err != nil {
+		log.WithError(err).Error("error creating temporary file")
+		return nil, err
+	}
+
+	// Join the shards and write them
+	if err := enc.Join(tf, shards, metadata.Size); err != nil {
+		log.WithError(err).Error("error joining shards")
+		return nil, fmt.Errorf("error joining shards: %w", err)
+	}
+
+	return tf, nil
+}
+
 // TODO: Add other node selection algorithms
 //       For example: affinity+random selection
 func selectNode(nodes []string) string {
