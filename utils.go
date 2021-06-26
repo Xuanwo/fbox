@@ -120,7 +120,7 @@ func createShards(r io.ReadSeeker, size int64) ([]io.ReadSeeker, error) {
 }
 
 func getShard(uri string) (io.Reader, error) {
-	tf, err := ioutil.TempFile("", "fbox-receive-*")
+	tf, err := ioutil.TempFile("", "fbox-get-*")
 	if err != nil {
 		log.WithError(err).Error("error creating temporary shard file")
 		return nil, err
@@ -217,7 +217,7 @@ func repairShards(enc reedsolomon.StreamEncoder, shards []io.Reader) ([]io.Reade
 	return shards, nil
 }
 
-func readFile(metadata Metadata) (io.Reader, error) {
+func readShards(metadata Metadata) (io.Reader, error) {
 	// Create matrix
 	enc, err := reedsolomon.NewStream(dataShards, parityShards)
 	if err != nil {
@@ -240,12 +240,15 @@ func readFile(metadata Metadata) (io.Reader, error) {
 	}
 	if !ok {
 		log.Warn("shard verification failed, reconstructing shards...")
+		shards, err = repairShards(enc, shards)
+		if err != nil {
+			log.WithError(err).Error("error repairing shards")
+			return nil, fmt.Errorf("error repairing shards: %s", err)
+		}
 	}
 
-	shards, err = repairShards(enc, shards)
-	if err != nil {
-		log.WithError(err).Error("error repairing shards")
-		return nil, fmt.Errorf("error repairing shards: %s", err)
+	for _, shard := range shards {
+		_, _ = shard.(*os.File).Seek(0, io.SeekStart)
 	}
 
 	tf, err := ioutil.TempFile("", "fbox-*")
@@ -259,6 +262,8 @@ func readFile(metadata Metadata) (io.Reader, error) {
 		log.WithError(err).Error("error joining shards")
 		return nil, fmt.Errorf("error joining shards: %w", err)
 	}
+
+	_, _ = tf.Seek(0, io.SeekStart)
 
 	return tf, nil
 }

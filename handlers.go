@@ -140,7 +140,7 @@ func downloadHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	f, err := readFile(metadata)
+	f, err := readShards(metadata)
 	if err != nil {
 		msg := fmt.Sprintf("error reading file: %s", err)
 		log.WithError(err).Error(msg)

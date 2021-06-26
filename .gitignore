@@ -5,6 +5,8 @@
 **.DS_Store
 
 /data[0-9]*
+/in
+/out
 /fbox
 
 /cmd/fbox/fbox
