@@ -24,9 +24,10 @@ func (h Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	var logger *log.Entry
 
 	status, body := func() (int, []byte) {
-		hkey := r.URL.Path[1:]
+		hkey := r.URL.Path
 		key, err := hex.DecodeString(hkey)
 		if err != nil {
+			log.WithError(err).Errorf("error decoding key: %s", hkey)
 			return http.StatusBadRequest, []byte(
 				fmt.Sprintf("%q: not a valid path, expecting hex key only",
 					r.URL.Path),

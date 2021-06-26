@@ -1,14 +1,13 @@
 package main
 
 import (
-	"encoding/base32"
+	"encoding/hex"
 	"fmt"
 	"io"
 	"io/ioutil"
 	"math/rand"
 	"net/http"
 	"os"
-	"strings"
 	"time"
 
 	"github.com/klauspost/reedsolomon"
@@ -106,13 +105,9 @@ func createShards(r io.ReadSeeker, size int64) ([]io.ReadSeeker, error) {
 	}
 
 	// Close and reopen outputs and return as slice of readers
-	rs := make([]io.ReadSeeker, dataShards)
-	for i := range data {
-		if err := out[i].Close(); err != nil {
-			log.WithError(err).Error("error closing output")
-			return nil, fmt.Errorf("error closing output: %w", err)
-		}
-
+	rs := make([]io.ReadSeeker, shards)
+	for i := range out {
+		_ = out[i].Close()
 		f, err := os.Open(out[i].Name())
 		if err != nil {
 			log.WithError(err).Error("error reopening output")
@@ -192,11 +187,7 @@ func hashReader(r io.Reader) (string, error) {
 
 	sum := hasher.Sum(nil)
 
-	// Base32 is URL-safe, unlike Base64, and shorter than hex.
-	encoding := base32.StdEncoding.WithPadding(base32.NoPadding)
-	hash := strings.ToLower(encoding.EncodeToString(sum[:]))
-
-	return hash, nil
+	return hex.EncodeToString(sum), nil
 }
 
 func request(method, url string, headers http.Header, body io.Reader) (*http.Response, error) {

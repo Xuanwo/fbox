@@ -80,6 +80,8 @@ func joinNode(aAddr, mAddr string) error {
 func main() {
 	flag.Parse()
 
+	log.SetReportCaller(true)
+
 	if debug {
 		log.SetLevel(log.DebugLevel)
 	} else {
@@ -103,13 +105,19 @@ func main() {
 	storage := store.NewDiskStore(dir)
 	log.Infof("using %s for storage", storage)
 
-	http.Handle("/blobs", blob.NewHandler(store.NewDiskStore(dir)))
+	http.Handle(
+		"/blob/",
+		http.StripPrefix(
+			"/blob/",
+			blob.NewHandler(store.NewDiskStore(dir)),
+		),
+	)
 
 	if mAddr == "" {
 		http.HandleFunc("/join", joinHandler)
 		http.HandleFunc("/nodes", nodesHandler)
-		http.HandleFunc("/upload", uploadHandler)
-		http.HandleFunc("/download", downloadHandler)
+		http.Handle("/upload/", http.StripPrefix("/upload/", http.HandlerFunc(uploadHandler)))
+		http.Handle("/download/", http.StripPrefix("/download/", http.HandlerFunc(downloadHandler)))
 
 		// Join ourself
 		go func() {
