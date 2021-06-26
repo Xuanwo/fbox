@@ -8,7 +8,9 @@ require (
 	github.com/cpuguy83/go-md2man v1.0.10 // indirect
 	github.com/eknkc/amber v0.0.0-20171010120322-cdade1c07385 // indirect
 	github.com/hashicorp/go-sockaddr v1.0.0
+	github.com/klauspost/reedsolomon v1.9.9 // indirect
 	github.com/mitchellh/go-homedir v1.1.0 // indirect
+	github.com/sirmackk/rsutils v0.0.0-20210104013503-da6c5afaa913 // indirect
 	github.com/sirupsen/logrus v1.8.1
 	github.com/spf13/cobra v1.1.3 // indirect
 	github.com/spf13/pflag v1.0.5
@@ -19,5 +21,5 @@ require (
 	github.com/unrolled/logger v0.0.0-20201216141554-31a3694fe979
 	github.com/unrolled/render v1.4.0
 	github.com/xordataexchange/crypt v0.0.3-0.20170626215501-b2862e3d0a77 // indirect
-	golang.org/x/sys v0.0.0-20210603125802-9665404d3644 // indirect
+	golang.org/x/crypto v0.0.0-20210616213533-5ff15b29337e // indirect
 )

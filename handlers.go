@@ -3,8 +3,11 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"io"
 	"net"
 	"net/http"
+	"net/http/httputil"
+	"os"
 
 	log "github.com/sirupsen/logrus"
 	"github.com/tomasen/realip"
@@ -65,5 +68,69 @@ func nodesHandler(w http.ResponseWriter, req *http.Request) {
 	r.JSON(w, http.StatusOK, nodes)
 }
 
-func uploadHandler(w http.ResponseWriter, r *http.Request)   {}
+func uploadHandler(w http.ResponseWriter, r *http.Request) {
+	dump, err := httputil.DumpRequest(r, true)
+	if err != nil {
+		http.Error(w, fmt.Sprint(err), http.StatusInternalServerError)
+		return
+	}
+
+	log.Debugf("req: %q", dump)
+
+	name := r.URL.Path
+
+	tf, err := receiveFile(r.Body)
+	if err != nil {
+		msg := fmt.Sprintf("error receiving file: %s", err)
+		log.WithError(err).Error(msg)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	hash, err := hashReader(tf)
+	if err != nil {
+		msg := fmt.Sprintf("error hashing file: %s", err)
+		log.WithError(err).Error(msg)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	if _, err := tf.Seek(0, io.SeekStart); err != nil {
+		msg := fmt.Sprintf("error seeking file: %s", err)
+		log.WithError(err).Error(msg)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	stat, err := os.Stat(tf.Name())
+	if err != nil {
+		msg := fmt.Sprintf("error getting file size: %s", err)
+		log.WithError(err).Error(msg)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	shards, err := createShards(tf, stat.Size())
+	if err != nil {
+		msg := fmt.Sprintf("error creating shards: %s", err)
+		log.WithError(err).Error(msg)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	uris, err := storeShards(shards)
+	if err != nil {
+		msg := fmt.Sprintf("error storing shards: %s", err)
+		log.WithError(err).Error(msg)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	files[name] = Metadata{
+		Name:   name,
+		Size:   stat.Size(),
+		Hash:   hash,
+		Shards: uris,
+	}
+}
+
 func downloadHandler(w http.ResponseWriter, r *http.Request) {}
