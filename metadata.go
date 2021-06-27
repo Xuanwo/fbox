@@ -78,7 +78,7 @@ func getAllMetadata() ([]*Metadata, error) {
 }
 
 func getRemoteMetadata(addr string, name string) (*Metadata, bool, error) {
-	uri := fmt.Sprintf("http://%s/file/%s", addr, name)
+	uri := fmt.Sprintf("http://%s/metadata/%s", addr, name)
 	res, err := request(http.MethodGet, uri, nil, nil)
 	if err != nil {
 		log.WithError(err).Error("error making metdata request")
