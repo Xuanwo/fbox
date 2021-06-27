@@ -203,6 +203,11 @@ func repairShards(enc reedsolomon.StreamEncoder, shards []io.Reader) ([]io.Reade
 		}
 	}
 
+	// Reset shards so we can re-read
+	for _, shard := range shards {
+		_, _ = shard.(*os.File).Seek(0, io.SeekStart)
+	}
+
 	ok, err := enc.Verify(shards)
 	if err != nil {
 		log.WithError(err).Error("error verifying repaired shards")
@@ -235,15 +240,16 @@ func readShards(metadata *Metadata) (io.Reader, error) {
 	// Verify the shards
 	ok, err := enc.Verify(shards)
 	if err != nil {
-		log.WithError(err).Error("error verifying shards")
-		return nil, fmt.Errorf("error verifying shards: %w", err)
+		log.WithError(err).Warn("error verifying shards")
 	}
 	if !ok {
 		log.Warn("shard verification failed, reconstructing shards...")
 
 		// Reset shards so we can re-read
 		for _, shard := range shards {
-			_, _ = shard.(*os.File).Seek(0, io.SeekStart)
+			if shard != nil {
+				_, _ = shard.(*os.File).Seek(0, io.SeekStart)
+			}
 		}
 
 		shards, err = repairShards(enc, shards)
