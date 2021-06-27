@@ -33,13 +33,16 @@ var (
 const helpText = `
 fbox is a simple distributed file system...
 
+Valid commands:
+ - cat <name> -- Downloads the given file given by <name> to stdout
+
 Valid options:
 `
 
 func init() {
 	baseProg := filepath.Base(os.Args[0])
 	flag.Usage = func() {
-		fmt.Fprintf(os.Stderr, "Usage: %s [options]\n", baseProg)
+		fmt.Fprintf(os.Stderr, "Usage: %s [options] [command [arguments]]\n", baseProg)
 		fmt.Fprint(os.Stderr, helpText)
 		flag.PrintDefaults()
 	}
