@@ -129,7 +129,7 @@ func main() {
 		http.HandleFunc("/join", joinHandler)
 		http.HandleFunc("/nodes", nodesHandler)
 		http.HandleFunc("/files", filesHandler)
-		http.Handle("/metadata", http.StripPrefix("/metadata/", http.HandlerFunc(metadataHandler)))
+		http.Handle("/metadata/", http.StripPrefix("/metadata/", http.HandlerFunc(metadataHandler)))
 		http.Handle("/upload/", http.StripPrefix("/upload/", http.HandlerFunc(uploadHandler)))
 		http.Handle("/download/", http.StripPrefix("/download/", http.HandlerFunc(downloadHandler)))
 
