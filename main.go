@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/hashicorp/go-sockaddr/template"
@@ -98,6 +99,13 @@ func main() {
 	mAddr := mustParseAddress(master)
 	aAddr := mustParseAddress(advertiseAddress)
 
+	switch strings.ToLower(flag.Arg(0)) {
+	case "cat":
+		status, err := cmdCat(mAddr, flag.Args()[1:])
+		log.WithError(err).Error("error reading file")
+		os.Exit(status)
+	}
+
 	dir := os.ExpandEnv(dir)
 	if err := os.MkdirAll(dir, 0700); err != nil {
 		log.WithError(err).Fatalf("error creating directory %s", dir)
@@ -118,6 +126,7 @@ func main() {
 		http.HandleFunc("/join", joinHandler)
 		http.HandleFunc("/nodes", nodesHandler)
 		http.HandleFunc("/files", filesHandler)
+		http.Handle("/metadata", http.StripPrefix("/metadata/", http.HandlerFunc(metadataHandler)))
 		http.Handle("/upload/", http.StripPrefix("/upload/", http.HandlerFunc(uploadHandler)))
 		http.Handle("/download/", http.StripPrefix("/download/", http.HandlerFunc(downloadHandler)))
 

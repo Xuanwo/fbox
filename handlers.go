@@ -79,10 +79,31 @@ func filesHandler(w http.ResponseWriter, req *http.Request) {
 	r.JSON(w, http.StatusOK, files)
 }
 
-func uploadHandler(w http.ResponseWriter, r *http.Request) {
-	name := r.URL.Path
+func metadataHandler(w http.ResponseWriter, req *http.Request) {
+	name := req.URL.Path
 
-	tf, err := receiveFile(r.Body)
+	metadata, ok, err := getMetadata(name)
+	if err != nil {
+		msg := fmt.Sprintf("error getting metdata for %s: %s", name, err)
+		log.Error(msg)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	if !ok {
+		msg := fmt.Sprintf("error file not found: %s", name)
+		log.Error(msg)
+		w.WriteHeader(http.StatusNotFound)
+		return
+	}
+
+	r.JSON(w, http.StatusOK, metadata)
+}
+
+func uploadHandler(w http.ResponseWriter, req *http.Request) {
+	name := req.URL.Path
+
+	tf, err := receiveFile(req.Body)
 	if err != nil {
 		msg := fmt.Sprintf("error receiving file: %s", err)
 		log.WithError(err).Error(msg)
@@ -142,8 +163,8 @@ func uploadHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func downloadHandler(w http.ResponseWriter, r *http.Request) {
-	name := r.URL.Path
+func downloadHandler(w http.ResponseWriter, req *http.Request) {
+	name := req.URL.Path
 
 	metadata, ok, err := getMetadata(name)
 	if err != nil {

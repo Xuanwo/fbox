@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io/ioutil"
+	"net/http"
 
 	"github.com/creasty/defaults"
 	"github.com/prologic/bitcask"
@@ -73,6 +75,32 @@ func getAllMetadata() ([]*Metadata, error) {
 	}
 
 	return ms, nil
+}
+
+func getRemoteMetadata(addr string, name string) (*Metadata, bool, error) {
+	uri := fmt.Sprintf("http://%s/file/%s", addr, name)
+	res, err := request(http.MethodGet, uri, nil, nil)
+	if err != nil {
+		log.WithError(err).Error("error making metdata request")
+		return nil, false, fmt.Errorf("error making metadata request: %w", err)
+	}
+	if res.StatusCode != 200 {
+		log.WithField("Status", res.Status).Error("error making metadata request")
+		return nil, false, fmt.Errorf("error making metadata request: %s", res.Status)
+	}
+	defer res.Body.Close()
+
+	data, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		log.WithError(err).Error("error reading metadata response")
+		return nil, false, fmt.Errorf("error reading metadata response: %w", err)
+	}
+
+	m, err := loadMetadata(data)
+	if err != nil {
+		return nil, false, err
+	}
+	return m, true, nil
 }
 
 func getMetadata(key string) (*Metadata, bool, error) {
