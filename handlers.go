@@ -68,6 +68,14 @@ func nodesHandler(w http.ResponseWriter, req *http.Request) {
 }
 
 func filesHandler(w http.ResponseWriter, req *http.Request) {
+	files, err := getAllMetadata()
+	if err != nil {
+		msg := fmt.Sprintf("error reading all metadata: %s", err)
+		log.WithError(err).Error(msg)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
 	r.JSON(w, http.StatusOK, files)
 }
 
@@ -120,19 +128,31 @@ func uploadHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	files[name] = Metadata{
+	if err := setMetadata(name, &Metadata{
 		Name:   name,
 		Size:   stat.Size(),
 		Hash:   hash,
 		Parity: parityShards,
 		Shards: uris,
+	}); err != nil {
+		msg := fmt.Sprintf("error storing metadata: %s", err)
+		log.WithError(err).Error(msg)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
 	}
 }
 
 func downloadHandler(w http.ResponseWriter, r *http.Request) {
 	name := r.URL.Path
 
-	metadata, ok := files[name]
+	metadata, ok, err := getMetadata(name)
+	if err != nil {
+		msg := fmt.Sprintf("error getting metdata for %s: %s", name, err)
+		log.Error(msg)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
 	if !ok {
 		msg := fmt.Sprintf("error file not found: %s", name)
 		log.Error(msg)

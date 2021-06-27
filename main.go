@@ -14,6 +14,7 @@ import (
 	flag "github.com/spf13/pflag"
 	"github.com/unrolled/logger"
 
+	"github.com/prologic/bitcask"
 	"github.com/prologic/fbox/blob"
 	"github.com/prologic/fbox/store"
 )
@@ -104,6 +105,12 @@ func main() {
 	dir = os.ExpandEnv(dir)
 	storage := store.NewDiskStore(dir)
 	log.Infof("using %s for storage", storage)
+
+	var err error
+	db, err = bitcask.Open(filepath.Join(dir, "meta.db"))
+	if err != nil {
+		log.WithError(err).Fatalf("error opening metdata db %s", dir)
+	}
 
 	http.Handle(
 		"/blob/",

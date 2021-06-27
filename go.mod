@@ -6,10 +6,12 @@ require (
 	github.com/armon/consul-api v0.0.0-20180202201655-eb2c6b5be1b6 // indirect
 	github.com/coreos/go-etcd v2.0.0+incompatible // indirect
 	github.com/cpuguy83/go-md2man v1.0.10 // indirect
+	github.com/creasty/defaults v1.5.1 // indirect
 	github.com/eknkc/amber v0.0.0-20171010120322-cdade1c07385 // indirect
 	github.com/hashicorp/go-sockaddr v1.0.0
 	github.com/klauspost/reedsolomon v1.9.9 // indirect
 	github.com/mitchellh/go-homedir v1.1.0 // indirect
+	github.com/prologic/bitcask v0.3.10 // indirect
 	github.com/sirmackk/rsutils v0.0.0-20210104013503-da6c5afaa913 // indirect
 	github.com/sirupsen/logrus v1.8.1
 	github.com/spf13/cobra v1.1.3 // indirect

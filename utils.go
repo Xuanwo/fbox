@@ -217,7 +217,7 @@ func repairShards(enc reedsolomon.StreamEncoder, shards []io.Reader) ([]io.Reade
 	return shards, nil
 }
 
-func readShards(metadata Metadata) (io.Reader, error) {
+func readShards(metadata *Metadata) (io.Reader, error) {
 	// Create matrix
 	enc, err := reedsolomon.NewStream(dataShards, parityShards)
 	if err != nil {
