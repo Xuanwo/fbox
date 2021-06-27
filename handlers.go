@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"net"
 	"net/http"
 	"os"
@@ -79,25 +80,83 @@ func filesHandler(w http.ResponseWriter, req *http.Request) {
 	r.JSON(w, http.StatusOK, files)
 }
 
-func metadataHandler(w http.ResponseWriter, req *http.Request) {
-	name := req.URL.Path
+func metadataHandler(w http.ResponseWriter, r *http.Request) {
+	var logger *log.Entry
 
-	metadata, ok, err := getMetadata(name)
-	if err != nil {
-		msg := fmt.Sprintf("error getting metdata for %s: %s", name, err)
-		log.Error(msg)
-		w.WriteHeader(http.StatusInternalServerError)
-		return
+	status, body := func() (int, []byte) {
+		name := r.URL.Path
+
+		logger = log.WithFields(log.Fields{
+			"op":   r.Method,
+			"name": name,
+		})
+
+		switch r.Method {
+		case http.MethodDelete:
+			ok, err := deleteMetadata(name)
+			if err != nil {
+				logger.WithField("err", err).Error()
+				return http.StatusInternalServerError, []byte(fmt.Sprintf("%q: %v", name, err))
+			}
+			if !ok {
+				logger.WithField("err", err).Debug("Not found")
+				return http.StatusNotFound, nil
+			}
+			logger.Debug("Success")
+			return http.StatusOK, nil
+		case http.MethodGet:
+			metadata, ok, err := getMetadata(name)
+			if err != nil {
+				logger.WithField("err", err).Error()
+				return http.StatusInternalServerError, []byte(fmt.Sprintf("%q: %v", name, err))
+			}
+
+			if !ok {
+				logger.WithField("err", err).Debug("Not found")
+				return http.StatusNotFound, nil
+			}
+
+			data, err := metadata.Bytes()
+			if err != nil {
+				logger.WithField("err", err).Error()
+				return http.StatusInternalServerError, []byte(fmt.Sprintf("%q: %v", name, err))
+			}
+			logger.Debug("Success")
+			return http.StatusOK, data
+		case http.MethodPut:
+			value, err := ioutil.ReadAll(r.Body)
+			if err != nil {
+				logger.WithField("err", err).Error()
+				return http.StatusInternalServerError, []byte(fmt.Sprintf("%q: %v", name, err))
+			}
+			metadata, err := loadMetadata(value)
+			if err != nil {
+				logger.WithField("err", err).Error()
+				return http.StatusInternalServerError, []byte(fmt.Sprintf("%q: %v", name, err))
+			}
+
+			if err := setMetadata(name, metadata); err != nil {
+				logger.WithField("err", err).Error()
+				return http.StatusInternalServerError, []byte(fmt.Sprintf("%q: %v", name, err))
+			}
+			logger.Debug("Success")
+			return http.StatusOK, nil
+		default:
+			logger.Warn("Bad request")
+			return http.StatusBadRequest, []byte(
+				fmt.Sprintf("%q: invalid method, expecting DELETE, GET,  or PUT",
+					r.Method,
+				))
+		}
+	}()
+
+	w.WriteHeader(status)
+	if body != nil {
+		if _, err := w.Write(body); err != nil {
+			logger.WithField("err", err).Error("Failed writing response")
+		}
 	}
 
-	if !ok {
-		msg := fmt.Sprintf("error file not found: %s", name)
-		log.Error(msg)
-		w.WriteHeader(http.StatusNotFound)
-		return
-	}
-
-	r.JSON(w, http.StatusOK, metadata)
 }
 
 func uploadHandler(w http.ResponseWriter, req *http.Request) {

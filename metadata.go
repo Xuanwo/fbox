@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -101,6 +102,40 @@ func getRemoteMetadata(addr string, name string) (*Metadata, bool, error) {
 		return nil, false, err
 	}
 	return m, true, nil
+}
+
+func setRemoteMetadata(addr string, name string, metadata *Metadata) error {
+	data, err := metadata.Bytes()
+	if err != nil {
+		log.WithError(err).Error("error serializing metdata")
+		return fmt.Errorf("error serializing metadata: %w", err)
+	}
+
+	uri := fmt.Sprintf("http://%s/metadata/%s", addr, name)
+	res, err := request(http.MethodPost, uri, nil, bytes.NewReader(data))
+	if err != nil {
+		log.WithError(err).Error("error making metdata request")
+		return fmt.Errorf("error making metadata request: %w", err)
+	}
+	if res.StatusCode != 200 {
+		log.WithField("Status", res.Status).Error("error making metadata request")
+		return fmt.Errorf("error making metadata request: %s", res.Status)
+	}
+	defer res.Body.Close()
+
+	return nil
+}
+
+func deleteMetadata(key string) (bool, error) {
+	if !db.Has([]byte(key)) {
+		return false, nil
+	}
+
+	if err := db.Delete([]byte(key)); err != nil {
+		return false, err
+	}
+
+	return true, nil
 }
 
 func getMetadata(key string) (*Metadata, bool, error) {

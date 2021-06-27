@@ -35,6 +35,7 @@ fbox is a simple distributed file system...
 
 Valid commands:
  - cat <name> -- Downloads the given file given by <name> to stdout
+ - put <name> -- Upload the given file given by <name>
 
 Valid options:
 `
@@ -109,6 +110,14 @@ func main() {
 			log.WithError(err).Error("error reading file")
 		}
 		os.Exit(status)
+	case "put":
+		status, err := cmdPut(mAddr, flag.Args()[1:])
+		if err != nil {
+			log.WithError(err).Error("error writing file")
+		}
+		os.Exit(status)
+	default:
+		log.Fatalf("invalid command: %s", flag.Arg(0))
 	}
 
 	dir := os.ExpandEnv(dir)
