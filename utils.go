@@ -240,6 +240,12 @@ func readShards(metadata *Metadata) (io.Reader, error) {
 	}
 	if !ok {
 		log.Warn("shard verification failed, reconstructing shards...")
+
+		// Reset shards so we can re-read
+		for _, shard := range shards {
+			_, _ = shard.(*os.File).Seek(0, io.SeekStart)
+		}
+
 		shards, err = repairShards(enc, shards)
 		if err != nil {
 			log.WithError(err).Error("error repairing shards")
@@ -247,6 +253,7 @@ func readShards(metadata *Metadata) (io.Reader, error) {
 		}
 	}
 
+	// Reset shards so we can re-read
 	for _, shard := range shards {
 		_, _ = shard.(*os.File).Seek(0, io.SeekStart)
 	}
@@ -263,6 +270,7 @@ func readShards(metadata *Metadata) (io.Reader, error) {
 		return nil, fmt.Errorf("error joining shards: %w", err)
 	}
 
+	// Reset output file so we can re-read
 	_, _ = tf.Seek(0, io.SeekStart)
 
 	return tf, nil
