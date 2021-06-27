@@ -168,3 +168,29 @@ func setMetadata(key string, m *Metadata) error {
 
 	return nil
 }
+
+func refreshNodes(addr string) error {
+	uri := fmt.Sprintf("http://%s/nodes", addr)
+	res, err := request(http.MethodGet, uri, nil, nil)
+	if err != nil {
+		log.WithError(err).Error("error making nodes request")
+		return fmt.Errorf("error nodes metadata request: %w", err)
+	}
+	if res.StatusCode != 200 {
+		log.WithField("Status", res.Status).Error("error making nodes request")
+		return fmt.Errorf("error making nodes request: %s", res.Status)
+	}
+	defer res.Body.Close()
+
+	data, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		log.WithError(err).Error("error reading nodes response")
+		return fmt.Errorf("error reading nodes response: %w", err)
+	}
+
+	if err := json.Unmarshal(data, &nodes); err != nil {
+		log.WithError(err).Error("error reading nodes response")
+		return fmt.Errorf("error reading nodes response: %w", err)
+	}
+	return nil
+}

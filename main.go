@@ -116,8 +116,6 @@ func main() {
 			log.WithError(err).Error("error writing file")
 		}
 		os.Exit(status)
-	default:
-		log.Fatalf("invalid command: %s", flag.Arg(0))
 	}
 
 	dir := os.ExpandEnv(dir)

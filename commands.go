@@ -49,6 +49,11 @@ func cmdPut(mAddr string, args []string) (int, error) {
 
 	name := args[0]
 
+	if err := refreshNodes(mAddr); err != nil {
+		log.WithError(err).Errorf("error refreshing nodes")
+		return 2, fmt.Errorf("error refreshing nodes: %w", err)
+	}
+
 	f, err := os.Open(name)
 	if err != nil {
 		log.WithError(err).Errorf("error opening file: %s", name)

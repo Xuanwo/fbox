@@ -123,7 +123,7 @@ func metadataHandler(w http.ResponseWriter, r *http.Request) {
 			}
 			logger.Debug("Success")
 			return http.StatusOK, data
-		case http.MethodPut:
+		case http.MethodPost:
 			value, err := ioutil.ReadAll(r.Body)
 			if err != nil {
 				logger.WithField("err", err).Error()
