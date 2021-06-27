@@ -105,7 +105,9 @@ func main() {
 	switch strings.ToLower(flag.Arg(0)) {
 	case "cat":
 		status, err := cmdCat(mAddr, flag.Args()[1:])
-		log.WithError(err).Error("error reading file")
+		if err != nil {
+			log.WithError(err).Error("error reading file")
+		}
 		os.Exit(status)
 	}
 
