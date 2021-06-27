@@ -40,6 +40,18 @@ func (h Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		})
 
 		switch r.Method {
+		case http.MethodDelete:
+			err := h.s.Delete(key)
+			if errors.Is(err, store.ErrNotFound) {
+				logger.WithField("err", err).Debug("Not found")
+				return http.StatusNotFound, nil
+			}
+			if err != nil {
+				logger.WithField("err", err).Error()
+				return http.StatusInternalServerError, []byte(fmt.Sprintf("%q: %v", hkey, err))
+			}
+			logger.Debug("Success")
+			return http.StatusOK, nil
 		case http.MethodGet:
 			value, err := h.s.Get(key)
 			if errors.Is(err, store.ErrNotFound) {
@@ -66,7 +78,10 @@ func (h Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			return http.StatusOK, nil
 		default:
 			logger.Warn("Bad request")
-			return http.StatusBadRequest, []byte(fmt.Sprintf("%q: invalid method, expecting GET or PUT", r.Method))
+			return http.StatusBadRequest, []byte(
+				fmt.Sprintf("%q: invalid method, expecting DELETE, GET,  or PUT",
+					r.Method,
+				))
 		}
 	}()
 

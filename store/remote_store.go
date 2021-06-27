@@ -13,8 +13,12 @@ type RemoteStore struct {
 	address string
 }
 
-func NewRemoteStore(address string) *RemoteStore {
+func NewRemoteStore(address string) Store {
 	return &RemoteStore{address: address}
+}
+
+func (s *RemoteStore) String() string {
+	return fmt.Sprintf("RemoteStore{address: %s}", s.address)
 }
 
 func (r *RemoteStore) Put(key, value []byte) (err error) {
@@ -64,6 +68,31 @@ func (r *RemoteStore) Get(key []byte) (value []byte, err error) {
 		return nil, errors.New(string(body))
 	}
 	return body, nil
+}
+
+func (r *RemoteStore) Delete(key []byte) (err error) {
+	url := r.pathFor(key)
+	req, err := http.NewRequest(http.MethodDelete, url, nil)
+	if err != nil {
+		return err
+	}
+	response, err := http.DefaultClient.Do(req)
+	if response != nil && response.Body != nil {
+		defer func() {
+			_ = response.Body.Close()
+		}()
+	}
+	if err != nil {
+		return err
+	}
+	if response.StatusCode == http.StatusNotFound {
+		return ErrNotFound
+	}
+	body, err := ioutil.ReadAll(response.Body)
+	if response.StatusCode != http.StatusOK {
+		return errors.New(string(body))
+	}
+	return nil
 }
 
 func (r *RemoteStore) pathFor(key []byte) string {

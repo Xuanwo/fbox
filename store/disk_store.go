@@ -44,6 +44,14 @@ func (s *DiskStore) Get(key []byte) (value []byte, err error) {
 	return
 }
 
+func (s *DiskStore) Delete(key []byte) (err error) {
+	os.Remove(s.pathFor(key))
+	if os.IsNotExist(err) {
+		err = fmt.Errorf("%x: %w", key, ErrNotFound)
+	}
+	return
+}
+
 func (s *DiskStore) pathFor(key []byte) string {
 	// Prevent ENAMETOOLONG, while retaining low probability of clashes.
 	if len(key) > sha512.Size {
