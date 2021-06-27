@@ -106,12 +106,6 @@ func main() {
 	storage := store.NewDiskStore(dir)
 	log.Infof("using %s for storage", storage)
 
-	var err error
-	db, err = bitcask.Open(filepath.Join(dir, "meta.db"))
-	if err != nil {
-		log.WithError(err).Fatalf("error opening metdata db %s", dir)
-	}
-
 	http.Handle(
 		"/blob/",
 		http.StripPrefix(
@@ -126,6 +120,13 @@ func main() {
 		http.HandleFunc("/files", filesHandler)
 		http.Handle("/upload/", http.StripPrefix("/upload/", http.HandlerFunc(uploadHandler)))
 		http.Handle("/download/", http.StripPrefix("/download/", http.HandlerFunc(downloadHandler)))
+
+		var err error
+		db, err = bitcask.Open(filepath.Join(dir, "meta.db"))
+		if err != nil {
+			log.WithError(err).Fatalf("error opening metdata db %s", dir)
+		}
+		log.Infof("storing metdata at %s using bitcask", filepath.Join(dir, "meta.db"))
 
 		// Join ourself
 		go func() {
