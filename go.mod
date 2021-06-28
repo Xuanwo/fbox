@@ -8,6 +8,7 @@ require (
 	github.com/cpuguy83/go-md2man v1.0.10 // indirect
 	github.com/creasty/defaults v1.5.1 // indirect
 	github.com/eknkc/amber v0.0.0-20171010120322-cdade1c07385 // indirect
+	github.com/evanw/esbuild v0.12.11
 	github.com/hashicorp/go-sockaddr v1.0.0
 	github.com/klauspost/reedsolomon v1.9.9 // indirect
 	github.com/mitchellh/go-homedir v1.1.0 // indirect

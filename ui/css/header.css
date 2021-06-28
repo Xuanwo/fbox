@@ -1,0 +1,8 @@
+fb-header {
+  display: block;
+  background-color: var(--color-primary);
+  color: white;
+  font-weight: bold;
+  font-size: 20px;
+  padding: 10px;
+}

@@ -10,3 +10,6 @@
 /fbox
 
 /cmd/fbox/fbox
+
+/ui/css/index.min.css
+/ui/js/index.min.js

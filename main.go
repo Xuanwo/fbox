@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"embed"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -28,6 +29,9 @@ var (
 	master           string
 	advertiseAddress string
 	dir              string
+
+	//go:embed ui
+	uiFS embed.FS
 )
 
 const helpText = `
@@ -148,6 +152,13 @@ func main() {
 			log.WithError(err).Fatalf("error opening metdata db %s", dir)
 		}
 		log.Infof("storing metdata at %s using bitcask", filepath.Join(dir, "meta.db"))
+
+		// Serve up the UI
+		if debug {
+			http.Handle("/ui/", http.FileServer(http.Dir("./ui/")))
+		} else {
+			http.Handle("/ui/", http.FileServer(http.FS(uiFS)))
+		}
 
 		// Join ourself
 		go func() {
