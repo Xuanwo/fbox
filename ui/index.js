@@ -1,4 +1,4 @@
-const m = require('../vendor/mithril.min.js')
+import m from '../vendor/mithril.js'
 
 document.addEventListener('DOMContentLoaded', function () {
   const ui = m('div', 'hello world');
