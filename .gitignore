@@ -11,4 +11,5 @@
 
 /cmd/fbox/fbox
 
-ui/index.min.js
+/ui/css/index.min.css
+/ui/js/index.min.js
