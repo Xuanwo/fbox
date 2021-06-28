@@ -19,7 +19,7 @@ export default function FileList (vnode) {
           context.files.map(file => {
             return m('li', { key: file.Name },
               m('a', { target: '_NEW', href: '/api/download/' + file.Name },
-                m('img', { src: './images/file-icon.png' }),
+                m('img', { src: './img/file-icon.png' }),
                 file.Name
               )
             )
