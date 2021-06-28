@@ -29,7 +29,7 @@ export default function FileList () {
         m('ul',
           state.files.map(file => {
             return m('li', { key: file.Name },
-              m('a', { href: '/api/download/' + file.Name },
+              m('a', { target: '_NEW', href: '/api/download/' + file.Name },
                 m('img', { src: './images/file-icon.png' }),
                 file.Name
               )
