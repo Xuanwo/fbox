@@ -1,4 +1,4 @@
-export default async function listFiles () {
+export default async function listFiles (context) {
   const response = await fetch('/api/files');
   const json = await response.json();
 
@@ -8,6 +8,9 @@ export default async function listFiles () {
       files.push(json[file]);
       return files;
     }, [])
+
+  context.files = files;
+  context.redraw();
 
   return files;
 }

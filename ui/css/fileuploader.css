@@ -1,14 +1,14 @@
 fb-fileuploader input[type="file"] {
   display: none;
 }
+
 fb-fileuploader label {
   border: 1px solid #ccc;
-  background-color: white;
-  color: var(--color-primary);
-  display: inline-block;
+  color: white;
+  background-color: #3b723d;
+  display: block;
   padding: 6px 12px;
   cursor: pointer;
-  margin-top: 10px;
-  display: block;
+  margin: 10px;
   text-align: center;
 }

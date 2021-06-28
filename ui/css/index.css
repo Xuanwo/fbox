@@ -10,3 +10,14 @@ body {
   font-size: 20px;
   --color-primary: #0f365c;
 }
+
+body > div {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+body > div > *:nth-child(2) {
+  flex-grow: 1;
+  overflow: auto;
+}
