@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"embed"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -26,6 +27,9 @@ var (
 	master           string
 	advertiseAddress string
 	dir              string
+
+	//go:embed ui
+	uiFS embed.FS
 )
 
 const helpText = `
@@ -119,6 +123,13 @@ func main() {
 		http.HandleFunc("/files", filesHandler)
 		http.Handle("/upload/", http.StripPrefix("/upload/", http.HandlerFunc(uploadHandler)))
 		http.Handle("/download/", http.StripPrefix("/download/", http.HandlerFunc(downloadHandler)))
+
+		// Serve up the UI
+		if debug {
+			http.Handle("/ui/", http.FileServer(http.Dir("./ui/")))
+		} else {
+			http.Handle("/ui/", http.FileServer(http.FS(uiFS)))
+		}
 
 		// Join ourself
 		go func() {
