@@ -14,6 +14,7 @@ export default function Header () {
         m('input', {
           id: 'file-uploader',
           onchange: handleChange(vnode.attrs.onChange),
+          multiple: 'multiple',
           type: 'file'
         })
       )
