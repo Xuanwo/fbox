@@ -19,9 +19,11 @@ fb-filelist li a {
   margin-bottom: 10px;
   padding: 10px 15px;
   display: block;
+  overflow-wrap: anywhere;
 }
 
 fb-filelist li img {
   height: 16px;
   margin-right: 10px;
+  display: inline;
 }
