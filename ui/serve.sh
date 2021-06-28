@@ -1,0 +1,1 @@
+ws --directory ui --port 8080 --rewrite '/api/(.*) -> http://localhost:8000/$1' --spa index.html

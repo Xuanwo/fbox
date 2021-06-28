@@ -1,0 +1,26 @@
+fb-filelist {
+  display: block;
+  background-color: #e4e9ee;
+  color: white;
+  font-weight: bold;
+  padding: 5px;
+}
+
+fb-filelist ul {
+  display: block;
+  background-color: white;
+  border-radius: 10px;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+fb-filelist li a {
+  padding: 10px 15px;
+  display: block;
+}
+
+fb-filelist li img {
+  height: 16px;
+  margin-right: 10px;
+}
