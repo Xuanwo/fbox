@@ -4,7 +4,9 @@ cleanup() {
   pkill fbox
 }
 
-IP="10.0.0.101"
+if [ -z "$IP" ]; then
+  IP="127.0.0.1"
+fi
 
 test -d data1 || mkdir -p data1
 test -d data2 || mkdir -p data2
