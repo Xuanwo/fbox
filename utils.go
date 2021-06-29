@@ -17,8 +17,6 @@ import (
 
 const (
 	requestTimeout = time.Second * 30
-	dataShards     = 3
-	parityShards   = 1
 )
 
 func receiveFile(r io.Reader) (*os.File, error) {

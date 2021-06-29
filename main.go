@@ -28,6 +28,8 @@ var (
 	bind             string
 	master           string
 	advertiseAddress string
+	dataShards       int
+	parityShards     int
 	dir              string
 
 	//go:embed ui
@@ -59,6 +61,8 @@ func init() {
 	flag.StringVarP(&master, "master", "m", "", "address:port of master")
 	flag.StringVarP(&advertiseAddress, "advertise-addr", "a", "", "[interface]:port to advertise")
 	flag.StringVarP(&dir, "dir", "d", "./data", "path to store data in")
+	flag.IntVarP(&dataShards, "data-shards", "s", 3, "no. of data shards")
+	flag.IntVarP(&parityShards, "parity-shards", "p", 1, "no. of parity shards")
 }
 
 func mustParseAddress(addr string) string {
