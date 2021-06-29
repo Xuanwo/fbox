@@ -19,6 +19,7 @@ import (
 	"github.com/prologic/bitcask"
 	"github.com/prologic/fbox/blob"
 	"github.com/prologic/fbox/store"
+	"xojoc.pw/useragent"
 )
 
 var (
@@ -163,6 +164,12 @@ func main() {
 		} else {
 			http.Handle("/ui/", http.FileServer(http.FS(uiFS)))
 		}
+		http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+			ua := useragent.Parse(r.UserAgent())
+			if ua.Type == useragent.Browser {
+				http.Redirect(w, r, "/ui/", http.StatusFound)
+			}
+		})
 
 		// Join ourself
 		go func() {
