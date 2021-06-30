@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"time"
 
 	"github.com/creasty/defaults"
 	"github.com/prologic/bitcask"
@@ -19,11 +20,21 @@ var (
 )
 
 type Metadata struct {
-	Name   string
-	Size   int64
+	Name    string
+	Size    int64
+	Owner   int
+	Group   int
+	Mode    uint32
+	ModTime time.Time
+	IsDir   bool
+
 	Hash   string
 	Parity int
 	Shards []string
+}
+
+func NewMetadata() *Metadata {
+	return &Metadata{ModTime: time.Now()}
 }
 
 func (m Metadata) DataShards() int {
