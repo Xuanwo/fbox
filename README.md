@@ -3,9 +3,9 @@
 ![GitHub All Releases](https://img.shields.io/github/downloads/prologic/fbox/total)
 ![](https://github.com/prologic/fbox/workflows/Go/badge.svg)
 ![](https://github.com/prologic/fbox/workflows/ReviewDog/badge.svg)
-[![Go Report Card](https://goreportcard.com/badge/prologic/fbox)](https://goreportcard.com/report/prologic/shops)
+[![Go Report Card](https://goreportcard.com/badge/prologic/fbox)](https://goreportcard.com/report/prologic/fbox)
 [![codebeat badge](https://codebeat.co/badges/15fba8a5-3044-4f40-936f-9e0f5d5d1fd9)](https://codebeat.co/projects/github-com-prologic-fbox-master)
-[![GoDoc](https://godoc.org/github.com/prologic/fbox?status.svg)](https://godoc.org/github.com/prologic/shops)
+[![GoDoc](https://godoc.org/github.com/prologic/fbox?status.svg)](https://godoc.org/github.com/prologic/fbox)
 
 `fbox` is a distributed file system written in [Go](https://golang.org)
 that has the the following features:
@@ -68,13 +68,13 @@ download and install the latest release binary into `/usr/local/bin`
 For Linux x86_64:
 
 ```console
-curl -s https://api.github.com/repos/prologic/fbox/releases/latest | grep browser_download_url | grep Linux_x86_64 | cut -d '"' -f 4 | wget -q -O - -i - | tar -xv shops && mv shops /usr/local/bin/shops
+curl -s https://api.github.com/repos/prologic/fbox/releases/latest | grep browser_download_url | grep Linux_x86_64 | cut -d '"' -f 4 | wget -q -O - -i - | tar -xv fbox && mv fbox /usr/local/bin/fbox
 ```
 
 For macOS x86_64:
 
 ```console
-curl -s https://api.github.com/repos/prologic/fbox/releases/latest | grep browser_download_url | grep Darwin_x86_64 | cut -d '"' -f 4 | wget -q -O - -i - | tar -xv shops && mv shops /usr/local/bin/shops
+curl -s https://api.github.com/repos/prologic/fbox/releases/latest | grep browser_download_url | grep Darwin_x86_64 | cut -d '"' -f 4 | wget -q -O - -i - | tar -xv fbox && mv fbox /usr/local/bin/fbox
 ```
 
 ### Install from Homebrew
