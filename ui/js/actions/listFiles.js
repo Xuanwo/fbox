@@ -1,5 +1,5 @@
 export default async function listFiles (context) {
-  const response = await fetch('/files');
+  const response = await window.fetch('/files');
   const json = await response.json();
 
   const files = Object
@@ -7,7 +7,7 @@ export default async function listFiles (context) {
     .reduce((files, file) => {
       files.push(json[file]);
       return files;
-    }, [])
+    }, []);
 
   context.files = files;
   context.redraw();

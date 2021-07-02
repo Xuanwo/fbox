@@ -1,10 +1,10 @@
-import m from '../../vendor/mithril.js'
+import m from '../../vendor/mithril.js';
 
 export default function Header () {
   function handleChange (onChange) {
     return (event) => {
       onChange(event.target.files);
-    }
+    };
   }
 
   return {
@@ -17,7 +17,7 @@ export default function Header () {
           multiple: 'multiple',
           type: 'file'
         })
-      )
+      );
     }
-  }
+  };
 }
