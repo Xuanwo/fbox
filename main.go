@@ -152,11 +152,19 @@ func main() {
 		http.Handle("/download/", http.StripPrefix("/download/", http.HandlerFunc(downloadHandler)))
 
 		var err error
-		db, err = bitcask.Open(filepath.Join(dir, "meta.db"))
+
+		dbPath := filepath.Join(dir, "meta.db")
+		db, err = bitcask.Open(
+			dbPath,
+			// TODO: Make this configurable?
+			// XXX: Or figure out a better way to store paths?
+			bitcask.WithMaxKeySize(256),
+		)
+
 		if err != nil {
 			log.WithError(err).Fatalf("error opening metdata db %s", dir)
 		}
-		log.Infof("storing metdata at %s using bitcask", filepath.Join(dir, "meta.db"))
+		log.Infof("storing metdata at %s using bitcask", dbPath)
 
 		// Serve up the UI
 		if debug {
