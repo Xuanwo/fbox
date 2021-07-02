@@ -47,6 +47,10 @@ Valid commands:
 Valid options:
 `
 
+const (
+	maxPathLength = 256 // TODO: Should this be configurable?
+)
+
 func init() {
 	baseProg := filepath.Base(os.Args[0])
 	flag.Usage = func() {
@@ -158,7 +162,7 @@ func main() {
 			dbPath,
 			// TODO: Make this configurable?
 			// XXX: Or figure out a better way to store paths?
-			bitcask.WithMaxKeySize(256),
+			bitcask.WithMaxKeySize(maxPathLength),
 		)
 
 		if err != nil {

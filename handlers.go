@@ -161,6 +161,12 @@ func metadataHandler(w http.ResponseWriter, r *http.Request) {
 
 func uploadHandler(w http.ResponseWriter, req *http.Request) {
 	name := req.URL.Path
+	if len(name) > maxPathLength {
+		msg := fmt.Sprintf("error name %d length exceeds allowed maximum of %d", len(name), maxPathLength)
+		log.Warn(msg)
+		http.Error(w, msg, http.StatusUnprocessableEntity)
+		return
+	}
 
 	tf, err := receiveFile(req.Body)
 	if err != nil {
