@@ -166,7 +166,7 @@ func main() {
 		}
 		http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 			ua := useragent.Parse(r.UserAgent())
-			if ua.Type == useragent.Browser {
+			if ua != nil && ua.Type == useragent.Browser {
 				http.Redirect(w, r, "/ui/", http.StatusFound)
 			}
 		})
