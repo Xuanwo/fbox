@@ -1,11 +1,13 @@
-import m from '../vendor/mithril.js'
+import m from '../vendor/mithril.js';
 
-import Header from './components/Header.js'
-import FileList from './components/FileList.js'
-import FileUploader from './components/FileUploader.js'
+import Header from './components/Header.js';
+import FileList from './components/FileList.js';
+import FileUploader from './components/FileUploader.js';
 
-import listFiles from './actions/listFiles.js'
-import uploadFile from './actions/uploadFile.js'
+import listFiles from './actions/listFiles.js';
+import uploadFile from './actions/uploadFile.js';
+
+import onDragDrop from './utils/onDragDrop.js';
 
 document.addEventListener('DOMContentLoaded', function () {
   const context = {
@@ -14,10 +16,12 @@ document.addEventListener('DOMContentLoaded', function () {
 
   function handleFileUpload (files) {
     Array.from(files).forEach(async file => {
-      await uploadFile(file)
+      await uploadFile(file);
       listFiles(context);
-    })
+    });
   }
+
+  onDragDrop(handleFileUpload);
 
   function render () {
     const ui = m('div',
