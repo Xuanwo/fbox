@@ -160,7 +160,7 @@ func main() {
 
 		// Serve up the UI
 		if debug {
-			http.Handle("/ui/", http.FileServer(http.Dir("./ui/")))
+			http.Handle("/ui/", http.StripPrefix("/ui/", http.FileServer(http.Dir("./ui/"))))
 		} else {
 			http.Handle("/ui/", http.FileServer(http.FS(uiFS)))
 		}

@@ -12,7 +12,7 @@ deps:
 
 dev : DEBUG=1
 dev : build
-	./start-cluster.sh
+	@DEBUG=$(DEBUG) ./start-cluster.sh
 
 fbox: generate
 	@$(GOCMD) build -tags "netgo static_build" -installsuffix netgo \
