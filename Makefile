@@ -9,7 +9,6 @@ GOCMD=go
 all: build
 
 deps:
-	@$(GOCMD) get -u github.com/tdewolff/minify/v2/cmd/...
 
 dev : DEBUG=1
 dev : build
@@ -27,9 +26,6 @@ build: fbox
 generate:
 	@if [ x"$(DEBUG)" = x"1"  ]; then		\
 	  echo 'Running in debug mode...';	\
-	else								\
-	  minify -b -o ./ui/css/index.min.css ./ui/css/*.css;	\
-	  minify -b -o ./ui/js/index.min.js ./ui/js/*.js;		\
 	fi
 
 install: build
