@@ -7,22 +7,21 @@
 [![codebeat badge](https://codebeat.co/badges/15fba8a5-3044-4f40-936f-9e0f5d5d1fd9)](https://codebeat.co/projects/github-com-prologic-fbox-master)
 [![GoDoc](https://godoc.org/github.com/prologic/fbox?status.svg)](https://godoc.org/github.com/prologic/shops)
 
-`fbox` is a ... written in [Go](https://golang.org) that has the the following
-features:
+`fbox` is a distributed file system written in [Go](https://golang.org)
+that has the the following features:
 
 **Current Features**:
 
-- Sharding
-- Erasure Encoding
 - Single portable binary
+- Simple to setup and maintain
+- A Web Interface with Drag 'n Drop
+- Data redundancy with erasure coding and sharding
 
 **Planned Features:**
 
 - POSIX compatible FUSE interface
 - S3 Object Storage interface
 - Docker Volume Driver
-
-
 
 Table of Contents
 =================
