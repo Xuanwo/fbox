@@ -67,7 +67,7 @@ func loadMetadata(data []byte) (metadata *Metadata, err error) {
 }
 
 func getAllMetadata() ([]*Metadata, error) {
-	var ms []*Metadata
+	ms := make([]*Metadata, 0)
 
 	err := db.Fold(func(key []byte) error {
 		data, err := db.Get(key)
