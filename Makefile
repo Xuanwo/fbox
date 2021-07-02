@@ -34,10 +34,12 @@ install: build
 ifeq ($(PUBLISH), 1)
 image:
 	@docker build --build-arg VERSION="$(VERSION)" --build-arg COMMIT="$(COMMIT)" -t prologic/fbox .
+	@docker scan --accept-license prologic/fbox
 	@docker push prologic/fbox
 else
 image:
 	@docker build --build-arg VERSION="$(VERSION)" --build-arg COMMIT="$(COMMIT)" -t prologic/fbox .
+	@docker scan --accept-license prologic/fbox
 endif
 
 release:
