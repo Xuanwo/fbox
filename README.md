@@ -27,6 +27,19 @@ that has the the following features:
 - S3 Object Storage interface
 - Docker Volume Driver
 
+There is also a publicly (_freely_) available demo instance available at:
+
+- https://files.mills.io/
+
+> __NOTE:__ I, [James Mills](https://github.com/prologic), run this instance
+on pretty cheap hardware on a limited budget. Please use it fairly so everyone
+can enjoy using it equally!
+
+> **[Sponsor](#Sponsor)** this project to support the development of new features,
+> improving existings ones and fix bugs!
+
+![Screenshot](https://files.mills.io/download/Screen%20Shot%202021-07-02%20at%2016.28.04.png)
+
 Table of Contents
 =================
 
