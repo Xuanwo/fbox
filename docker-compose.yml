@@ -1,0 +1,33 @@
+---
+version: "3.8"
+
+services:
+  fbox_master:
+    build: .
+    command: -a '{{ GetInterfaceIP "eth0" }}:8000' -d /data
+    ports:
+      - "8000:8000/tcp"
+    volumes:
+      - fbox_master:/data
+    restart: unless-stopped
+
+  fbox_node_1:
+    build: .
+    depends_on: [fbox_master]
+    command: -a '{{ GetInterfaceIP "eth0" }}:8001' -b 0.0.0.0:8001 -d /data -m http://fbox_master:8000
+    volumes:
+      - fbox_node_1:/data
+    restart: on-failure
+
+  fbox_node_2:
+    build: .
+    depends_on: [fbox_master]
+    command: -a '{{ GetInterfaceIP "eth0" }}:8002' -b 0.0.0.0:8002 -d /data -m http://fbox_master:8000
+    volumes:
+      - fbox_node_2:/data
+    restart: on-failure
+
+volumes:
+  fbox_master:
+  fbox_node_1:
+  fbox_node_2:
