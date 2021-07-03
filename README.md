@@ -1,6 +1,10 @@
 # fbox - Files in a Box
 
 ![GitHub All Releases](https://img.shields.io/github/downloads/prologic/fbox/total)
+![Docker Cloud Build Status](https://img.shields.io/docker/cloud/build/prologic/fbox)
+![Docker Pulls](https://img.shields.io/docker/pulls/prologic/fbox)
+![Docker Image Size (latest by date)](https://img.shields.io/docker/image-size/prologic/fbox)
+
 ![](https://github.com/prologic/fbox/workflows/Go/badge.svg)
 ![](https://github.com/prologic/fbox/workflows/ReviewDog/badge.svg)
 [![Go Report Card](https://goreportcard.com/badge/prologic/fbox)](https://goreportcard.com/report/prologic/fbox)
