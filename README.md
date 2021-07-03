@@ -190,6 +190,20 @@ And to retrieve the file:
 fbox -m http://127.0.0.1:8000 cat hello.txt
 ```
 
+## Production Deployments
+
+### Docker Swarm
+
+You can deploy `fbox` to a [Docker Swarm](https://docs.docker.com/engine/swarm/)
+cluster by utilising the provided `fbox.yml` Docker Stack. This also depends on
+and uses the [Traefik](https://docs.traefik.io/) ingress load balancer so you must
+also have that configured and running in your cluster appropriately.
+
+```console
+export DOMAIN=files.yourdomain.tld
+docker stack deploy -c fbox.yml fbox
+```
+
 ## License
 
 `fbox` is licensed under the terms of the [MIT License](/LICENSE)

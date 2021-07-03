@@ -2,6 +2,7 @@
 *.bak
 *.log
 *.log.*
+**.envrc
 **.DS_Store
 
 /data[0-9]*

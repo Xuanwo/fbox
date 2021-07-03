@@ -3,7 +3,7 @@ version: "3.8"
 
 services:
   master:
-    image: r.mills.io/prologic/fbox
+    image: prologic/fbox
     command: -a '{{ GetInterfaceIP "eth0" }}:8000' -d /data
     volumes:
       - fbox:/data
@@ -13,17 +13,17 @@ services:
     deploy:
       placement:
         constraints:
-          - "node.hostname == dm3.mills.io"
+          - "node.hostname == ${MASTER_NODE:?MASTER_NODE not configured}"
       labels:
         - "traefik.enable=true"
         - "traefik.docker.network=traefik"
         - "traefik.http.services.files.loadbalancer.server.port=8000"
-        - "traefik.http.routers.files.rule=Host(`files.mills.io`)"
+        - "traefik.http.routers.files.rule=Host(`${DOMAIN:?DOMAIN not configured}`)"
       restart_policy:
         condition: on-failure
 
   node:
-    image: r.mills.io/prologic/fbox
+    image: prologic/fbox
     command: -a '{{ GetInterfaceIP "eth0" }}:8000' -d /data -m http://fbox_master:8000
     volumes:
       - fbox:/data
