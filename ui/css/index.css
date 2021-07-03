@@ -19,5 +19,6 @@ body > div {
 
 body > div > *:nth-child(2) {
   flex-grow: 1;
+  padding-top: 8px;
   overflow: auto;
 }
