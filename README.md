@@ -68,13 +68,13 @@ download and install the latest release binary into `/usr/local/bin`
 For Linux x86_64:
 
 ```console
-curl -s https://api.github.com/repos/prologic/fbox/releases/latest | grep browser_download_url | grep Linux_x86_64 | cut -d '"' -f 4 | wget -q -O - -i - | tar -xv fbox && mv fbox /usr/local/bin/fbox
+curl -s https://api.github.com/repos/prologic/fbox/releases/latest | grep browser_download_url | grep Linux_x86_64 | cut -d '"' -f 4 | wget -q -O - -i - | tar -zxv fbox && mv fbox /usr/local/bin/fbox
 ```
 
 For macOS x86_64:
 
 ```console
-curl -s https://api.github.com/repos/prologic/fbox/releases/latest | grep browser_download_url | grep Darwin_x86_64 | cut -d '"' -f 4 | wget -q -O - -i - | tar -xv fbox && mv fbox /usr/local/bin/fbox
+curl -s https://api.github.com/repos/prologic/fbox/releases/latest | grep browser_download_url | grep Darwin_x86_64 | cut -d '"' -f 4 | wget -q -O - -i - | tar -zxv fbox && mv fbox /usr/local/bin/fbox
 ```
 
 ### Install from Homebrew
