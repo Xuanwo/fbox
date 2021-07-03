@@ -38,7 +38,7 @@ can enjoy using it equally!
 > **[Sponsor](#Sponsor)** this project to support the development of new features,
 > improving existings ones and fix bugs!
 
-![Screenshot](https://files.mills.io/download/Screen%20Shot%202021-07-02%20at%2016.28.04.png)
+![Screenshot](/docs/screenshot.png)
 
 Table of Contents
 =================
