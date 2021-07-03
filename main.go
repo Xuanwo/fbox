@@ -193,10 +193,14 @@ func main() {
 		}()
 	} else {
 		// Join an existing node
-		if err := joinNode(aAddr, mAddr); err != nil {
-			log.WithError(err).Fatalf("error joining node %s", mAddr)
-		}
-		log.Infof("successfully joined master node %s", master)
+		go func() {
+			time.Sleep(time.Second * 3)
+			if err := joinNode(aAddr, mAddr); err != nil {
+				log.WithError(err).Warnf("error joining node %s (retrying in 1s...)", mAddr)
+			}
+			log.Infof("successfully joined master node %s", master)
+			return
+		}()
 	}
 
 	app := logger.New(logger.Options{
